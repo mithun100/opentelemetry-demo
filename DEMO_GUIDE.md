@@ -1,6 +1,7 @@
 # OpenTelemetry Astronomy Shop - Complete Demo Guide
 
 ## 📖 Table of Contents
+
 - [Overview](#overview)
 - [Quick Start](#quick-start)
 - [Application Architecture](#application-architecture)
@@ -29,6 +30,7 @@
 ## Quick Start
 
 ### Prerequisites
+
 - Docker Desktop installed and running
 - At least 6GB RAM allocated to Docker
 - Ports 8080 available
@@ -50,6 +52,7 @@ docker compose down
 ```
 
 ### Access the Application
+
 Once started, open your browser to: **http://localhost:8080**
 
 ---
@@ -57,67 +60,68 @@ Once started, open your browser to: **http://localhost:8080**
 ## Application Architecture
 
 ### Business Domain: E-Commerce Astronomy Shop
+
 The application simulates a working e-commerce website selling space-themed products (telescopes, satellites, etc.).
 
 ### Service Breakdown
 
 #### 🛍️ **Core Business Services (10)**
 
-| Service | Language | Port | Purpose |
-|---------|----------|------|---------|
-| **frontend** | TypeScript (Next.js) | 8081 | Web UI for customers |
-| **frontend-proxy** | Go (Envoy) | 8080 | Entry point, routes all traffic |
-| **ad** | Java (Spring Boot) | Dynamic | Contextual advertisements |
-| **cart** | C# (.NET) | Dynamic | Shopping cart management |
-| **checkout** | Go | Dynamic | Order processing orchestrator |
-| **product-catalog** | Go | Dynamic | Product database & search |
-| **product-reviews** | Python (Flask) | Dynamic | Product reviews & AI assistant |
-| **recommendation** | Python | Dynamic | ML-based product recommendations |
-| **currency** | C++ | Dynamic | Multi-currency conversion |
-| **shipping** | Rust | Dynamic | Shipping quotes & fulfillment |
+| Service             | Language             | Port    | Purpose                          |
+| ------------------- | -------------------- | ------- | -------------------------------- |
+| **frontend**        | TypeScript (Next.js) | 8081    | Web UI for customers             |
+| **frontend-proxy**  | Go (Envoy)           | 8080    | Entry point, routes all traffic  |
+| **ad**              | Java (Spring Boot)   | Dynamic | Contextual advertisements        |
+| **cart**            | C# (.NET)            | Dynamic | Shopping cart management         |
+| **checkout**        | Go                   | Dynamic | Order processing orchestrator    |
+| **product-catalog** | Go                   | Dynamic | Product database & search        |
+| **product-reviews** | Python (Flask)       | Dynamic | Product reviews & AI assistant   |
+| **recommendation**  | Python               | Dynamic | ML-based product recommendations |
+| **currency**        | C++                  | Dynamic | Multi-currency conversion        |
+| **shipping**        | Rust                 | Dynamic | Shipping quotes & fulfillment    |
 
 #### 💰 **Transactional Services (3)**
 
-| Service | Language | Purpose |
-|---------|----------|---------|
-| **payment** | JavaScript (Node.js) | Payment processing |
-| **email** | Ruby | Order confirmation emails |
-| **accounting** | C# (.NET) | Financial record keeping |
+| Service        | Language             | Purpose                   |
+| -------------- | -------------------- | ------------------------- |
+| **payment**    | JavaScript (Node.js) | Payment processing        |
+| **email**      | Ruby                 | Order confirmation emails |
+| **accounting** | C# (.NET)            | Financial record keeping  |
 
 #### 🔧 **Supporting Services (3)**
 
-| Service | Language | Purpose |
-|---------|----------|---------|
-| **fraud-detection** | Kotlin | Fraud analysis via Kafka |
-| **quote** | PHP | Shipping price calculations |
-| **llm** | Python | AI assistant for products |
+| Service             | Language | Purpose                     |
+| ------------------- | -------- | --------------------------- |
+| **fraud-detection** | Kotlin   | Fraud analysis via Kafka    |
+| **quote**           | PHP      | Shipping price calculations |
+| **llm**             | Python   | AI assistant for products   |
 
 #### 🎮 **Management & Testing (4)**
 
-| Service | Technology | Purpose |
-|---------|-----------|---------|
-| **flagd** | Go | Feature flag server (OpenFeature) |
-| **flagd-ui** | Elixir (Phoenix) | Feature flag management UI |
-| **load-generator** | Python (Locust) | Synthetic traffic generation |
-| **image-provider** | Go | Product image hosting |
+| Service            | Technology       | Purpose                           |
+| ------------------ | ---------------- | --------------------------------- |
+| **flagd**          | Go               | Feature flag server (OpenFeature) |
+| **flagd-ui**       | Elixir (Phoenix) | Feature flag management UI        |
+| **load-generator** | Python (Locust)  | Synthetic traffic generation      |
+| **image-provider** | Go               | Product image hosting             |
 
 #### 🗄️ **Infrastructure (4)**
 
-| Service | Purpose |
-|---------|---------|
-| **kafka** | Message broker for async events |
-| **postgresql** | Database for accounting service |
-| **valkey-cart** | Redis-compatible cache for cart |
-| **otel-collector** | OpenTelemetry data pipeline |
+| Service            | Purpose                         |
+| ------------------ | ------------------------------- |
+| **kafka**          | Message broker for async events |
+| **postgresql**     | Database for accounting service |
+| **valkey-cart**    | Redis-compatible cache for cart |
+| **otel-collector** | OpenTelemetry data pipeline     |
 
 #### 📊 **Observability Stack (4)**
 
-| Service | Purpose |
-|---------|---------|
-| **jaeger** | Distributed trace visualization |
-| **grafana** | Metrics & log dashboards |
-| **prometheus** | Time-series metrics database |
-| **opensearch** | Log storage & search |
+| Service        | Purpose                         |
+| -------------- | ------------------------------- |
+| **jaeger**     | Distributed trace visualization |
+| **grafana**    | Metrics & log dashboards        |
+| **prometheus** | Time-series metrics database    |
+| **opensearch** | Log storage & search            |
 
 ---
 
@@ -174,18 +178,21 @@ The application simulates a working e-commerce website selling space-themed prod
 ### Key User Journeys
 
 #### 1️⃣ **Browse Products**
+
 ```
 User → frontend-proxy → frontend → [product-catalog, currency, recommendation, ad]
 Services: 5 | Protocols: HTTP, gRPC | Spans: ~6
 ```
 
 #### 2️⃣ **Add to Cart**
+
 ```
 User → frontend → cart → valkey-cart (Redis)
 Services: 3 | Data Store: Redis | Spans: ~3
 ```
 
 #### 3️⃣ **Complete Checkout** (Most Complex!)
+
 ```
 User → frontend → checkout orchestrates:
   ├→ cart (GetCart)
@@ -211,33 +218,34 @@ Services: 11+ | Duration: ~500ms-2s | Spans: 20+
 
 ### 🛍️ **Application Endpoints**
 
-| Endpoint | URL | Description |
-|----------|-----|-------------|
-| **Main Store** | http://localhost:8080 | E-commerce website (browse, cart, checkout) |
-| **Feature Flags UI** | http://localhost:8080/feature | Toggle feature flags & simulate failures |
-| **Product Images** | http://localhost:8080/images | Static product images |
+| Endpoint             | URL                           | Description                                 |
+| -------------------- | ----------------------------- | ------------------------------------------- |
+| **Main Store**       | http://localhost:8080         | E-commerce website (browse, cart, checkout) |
+| **Feature Flags UI** | http://localhost:8080/feature | Toggle feature flags & simulate failures    |
+| **Product Images**   | http://localhost:8080/images  | Static product images                       |
 
 ### 📊 **Local Observability Endpoints**
 
-| Tool | URL | Credentials | Purpose |
-|------|-----|-------------|---------|
-| **Jaeger UI** | http://localhost:8080/jaeger/ui | None | Distributed traces across all services |
-| **Grafana** | http://localhost:8080/grafana | admin / admin | Pre-built dashboards for metrics |
-| **Prometheus** | http://localhost:8080/prometheus | None | Raw metrics query (PromQL) |
-| **OpenSearch** | http://localhost:PORT | admin / admin | Log storage (check port with `docker compose port opensearch 9200`) |
+| Tool           | URL                              | Credentials   | Purpose                                                             |
+| -------------- | -------------------------------- | ------------- | ------------------------------------------------------------------- |
+| **Jaeger UI**  | http://localhost:8080/jaeger/ui  | None          | Distributed traces across all services                              |
+| **Grafana**    | http://localhost:8080/grafana    | admin / admin | Pre-built dashboards for metrics                                    |
+| **Prometheus** | http://localhost:8080/prometheus | None          | Raw metrics query (PromQL)                                          |
+| **OpenSearch** | http://localhost:PORT            | admin / admin | Log storage (check port with `docker compose port opensearch 9200`) |
 
 ### ☁️ **Splunk Observability Cloud**
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| **APM** | https://app.us1.signalfx.com/#/apm | Application traces |
-| **Infrastructure** | https://app.us1.signalfx.com/#/infra | Host & service metrics |
-| **Dashboards** | https://app.us1.signalfx.com/#/dashboards | Custom dashboards |
-| **RUM** | https://app.us1.signalfx.com/#/rum | Real User Monitoring (requires Splunk RUM SDK) |
+| Service            | URL                                       | Description                                    |
+| ------------------ | ----------------------------------------- | ---------------------------------------------- |
+| **APM**            | https://app.us1.signalfx.com/#/apm        | Application traces                             |
+| **Infrastructure** | https://app.us1.signalfx.com/#/infra      | Host & service metrics                         |
+| **Dashboards**     | https://app.us1.signalfx.com/#/dashboards | Custom dashboards                              |
+| **RUM**            | https://app.us1.signalfx.com/#/rum        | Real User Monitoring (requires Splunk RUM SDK) |
 
 ### 🔧 **Backend Service Endpoints** (gRPC - Internal Only)
 
 All backend services use **dynamically assigned ports**. Check with:
+
 ```bash
 docker compose ps
 ```
@@ -251,19 +259,20 @@ Services: ad, cart, checkout, currency, email, payment, product-catalog, product
 Feature flags allow you to **control application behavior in real-time** without redeployment. Perfect for demonstrating error handling and observability!
 
 ### Access Feature Flags
+
 **URL:** http://localhost:8080/feature
 
 ### Available Feature Flags
 
-| Flag Name | Default State | Effect When ENABLED | Use Case |
-|-----------|--------------|---------------------|----------|
-| **productCatalogFailure** | OFF | Product list fails to load | Demo error propagation |
-| **recommendationServiceFailure** | OFF | Product suggestions disappear | Demo graceful degradation |
-| **adServiceFailure** | OFF | Advertisements fail to display | Demo non-critical failure |
-| **cartServiceFailure** | OFF | Cart operations fail | Demo critical path failure |
-| **paymentServiceFailure** | OFF | Checkout payment fails | Demo transaction failure |
-| **productCatalogCache** | ON | Enable Redis caching for products | Demo performance optimization |
-| **recommendationCache** | ON | Enable caching for recommendations | Demo caching strategy |
+| Flag Name                        | Default State | Effect When ENABLED                | Use Case                      |
+| -------------------------------- | ------------- | ---------------------------------- | ----------------------------- |
+| **productCatalogFailure**        | OFF           | Product list fails to load         | Demo error propagation        |
+| **recommendationServiceFailure** | OFF           | Product suggestions disappear      | Demo graceful degradation     |
+| **adServiceFailure**             | OFF           | Advertisements fail to display     | Demo non-critical failure     |
+| **cartServiceFailure**           | OFF           | Cart operations fail               | Demo critical path failure    |
+| **paymentServiceFailure**        | OFF           | Checkout payment fails             | Demo transaction failure      |
+| **productCatalogCache**          | ON            | Enable Redis caching for products  | Demo performance optimization |
+| **recommendationCache**          | ON            | Enable caching for recommendations | Demo caching strategy         |
 
 ### How to Use Feature Flags
 
@@ -277,6 +286,7 @@ Feature flags allow you to **control application behavior in real-time** without
 ### Demo Scenarios with Feature Flags
 
 #### Scenario 1: Non-Critical Failure (Graceful Degradation)
+
 ```
 1. Enable "adServiceFailure"
 2. Shop still works - only ads are missing
@@ -285,6 +295,7 @@ Feature flags allow you to **control application behavior in real-time** without
 ```
 
 #### Scenario 2: Critical Path Failure
+
 ```
 1. Enable "cartServiceFailure"
 2. Cannot add items to cart
@@ -293,6 +304,7 @@ Feature flags allow you to **control application behavior in real-time** without
 ```
 
 #### Scenario 3: Performance Comparison
+
 ```
 1. Disable "productCatalogCache"
 2. Browse products - note latency in traces
@@ -308,11 +320,13 @@ Feature flags allow you to **control application behavior in real-time** without
 ### 🎬 **30-Minute Demo Flow for AppDynamics vs Splunk Presentation**
 
 #### **Part 1: Application Overview (5 minutes)**
+
 1. Show the working application at http://localhost:8080
 2. Browse products, add to cart, complete a purchase
 3. Explain: "This is a polyglot microservices app with 27 services in 8+ languages"
 
 #### **Part 2: Distributed Tracing (10 minutes)**
+
 1. Complete a checkout transaction
 2. Open Jaeger: http://localhost:8080/jaeger/ui
 3. Search for service "checkout" with recent traces
@@ -331,6 +345,7 @@ Feature flags allow you to **control application behavior in real-time** without
    - No vendor lock-in
 
 #### **Part 3: Feature Flags & Error Handling (8 minutes)**
+
 1. Open Feature Flags UI: http://localhost:8080/feature
 2. Enable "adServiceFailure"
 3. Refresh shop - ads section shows error
@@ -342,6 +357,7 @@ Feature flags allow you to **control application behavior in real-time** without
    - Quick recovery (toggle OFF)
 
 #### **Part 4: Metrics & Dashboards (5 minutes)**
+
 1. Open Grafana: http://localhost:8080/grafana (admin/admin)
 2. Navigate to "Demo" folder dashboards
 3. Show service-specific dashboards:
@@ -351,7 +367,9 @@ Feature flags allow you to **control application behavior in real-time** without
 5. Show host metrics and service map
 
 #### **Part 5: Polyglot & Vendor Neutrality (2 minutes)**
+
 **Wrap-up message:**
+
 - **27 services, 8+ languages** - OpenTelemetry works everywhere
 - **Zero code changes** to switch vendors
 - **Same data** flows to Jaeger AND Splunk simultaneously
@@ -365,13 +383,16 @@ Feature flags allow you to **control application behavior in real-time** without
 ### Common Issues
 
 #### ❌ Services showing "red" errors in logs
+
 **Status:** Normal behavior
 **Cause:** Load generator creates high traffic, otel-collector queue fills temporarily
 **Impact:** None - services retry and succeed
 **Action:** Ignore warnings like "sending queue is full" or "StatusCode.UNAVAILABLE"
 
 #### ❌ Cannot access http://localhost:8080
+
 **Check:**
+
 ```bash
 # Verify all services are running
 docker compose ps
@@ -384,7 +405,9 @@ docker compose restart frontend-proxy
 ```
 
 #### ❌ Traces not appearing in Jaeger
+
 **Check:**
+
 ```bash
 # Verify otel-collector is running
 docker compose logs otel-collector --tail 50
@@ -393,7 +416,9 @@ docker compose logs otel-collector --tail 50
 ```
 
 #### ❌ Feature flags not loading
+
 **Fix:**
+
 ```bash
 # Restart flagd and flagd-ui
 docker compose restart flagd flagd-ui
@@ -429,7 +454,9 @@ docker compose up -d [service-name]
 ```
 
 ### OpenSearch Port Discovery
+
 OpenSearch uses dynamic port mapping on macOS:
+
 ```bash
 # Find the mapped port
 OPENSEARCH_PORT=$(docker compose port opensearch 9200 | cut -d: -f2)
@@ -444,6 +471,7 @@ curl -u admin:admin -k "http://localhost:${OPENSEARCH_PORT}/_cat/indices"
 ## Additional Resources
 
 ### Configuration Files
+
 - **Splunk Integration:** `src/otel-collector/otelcol-config-splunk.yml`
 - **Environment Variables:** `.env`
 - **Feature Flags:** `src/flagd/demo.flagd.json`
@@ -452,6 +480,7 @@ curl -u admin:admin -k "http://localhost:${OPENSEARCH_PORT}/_cat/indices"
 - **Splunk Setup:** `SPLUNK_SETUP.md`
 
 ### Observability Data Flow
+
 ```
 All Services (27)
     │
@@ -472,9 +501,9 @@ All Services (27)
                                │   Grafana    │
                                │ (Dashboards) │
                                └──────────────┘
-                                       
+
                     PLUS:
-                    
+
                     otel-collector
                            │
                     ┌──────┼──────┐
@@ -491,6 +520,7 @@ All Services (27)
 ## Quick Reference Card
 
 ### 🚀 Start/Stop
+
 ```bash
 docker compose up -d        # Start all services
 docker compose down         # Stop all services
@@ -498,6 +528,7 @@ docker compose ps           # Check status
 ```
 
 ### 🌐 Key URLs
+
 - **Shop:** http://localhost:8080
 - **Jaeger:** http://localhost:8080/jaeger/ui
 - **Grafana:** http://localhost:8080/grafana (admin/admin)
@@ -505,6 +536,7 @@ docker compose ps           # Check status
 - **Splunk APM:** https://app.us1.signalfx.com/#/apm
 
 ### 🎛️ Demo Flow
+
 1. Browse & checkout → Generate traces
 2. View in Jaeger → Show distributed trace
 3. View in Splunk APM → Same data, different vendor
@@ -512,6 +544,7 @@ docker compose ps           # Check status
 5. Observe error in traces → Show error handling
 
 ### 📊 Key Talking Points
+
 - ✅ 27 microservices in 8+ languages
 - ✅ Vendor-neutral OpenTelemetry standard
 - ✅ Dual-destination telemetry (Jaeger + Splunk)
