@@ -1,0 +1,44 @@
+# Copyright The OpenTelemetry Authors
+# SPDX-License-Identifier: Apache-2.0
+#
+# Splunk Observability Cloud Configuration
+# This file extends the base collector configuration to send telemetry to Splunk
+
+exporters:
+  # Splunk APM (Traces)
+  sapm:
+    access_token: ${env:SPLUNK_ACCESS_TOKEN}
+    endpoint: https://ingest.${env:SPLUNK_REALM}.signalfx.com/v2/trace
+
+  # Splunk Infrastructure Monitoring (Metrics)
+  signalfx:
+    access_token: ${env:SPLUNK_ACCESS_TOKEN}
+    realm: ${env:SPLUNK_REALM}
+    # Send host metrics
+    send_compatible_metrics: true
+    # Sync host metadata
+    sync_host_metadata: true
+
+  # Splunk Log Observer (Logs)
+  # Note: Splunk Observability Cloud log ingestion endpoint
+  splunk_hec/logs:
+    token: ${env:SPLUNK_ACCESS_TOKEN}
+    endpoint: https://ingest.${env:SPLUNK_REALM}.signalfx.com/v1/log/otlp
+    source: "otel"
+    sourcetype: "otel"
+    tls:
+      insecure_skip_verify: false
+
+service:
+  pipelines:
+    traces:
+      # Add 'sapm' to send traces to Splunk APM
+      exporters: [otlp, debug, spanmetrics, sapm]
+
+    metrics:
+      # Add 'signalfx' to send metrics to Splunk IM
+      exporters: [otlphttp/prometheus, debug, signalfx]
+
+    logs:
+      # Send logs to both local OpenSearch and Splunk Log Observer
+      exporters: [opensearch, debug, splunk_hec/logs]
